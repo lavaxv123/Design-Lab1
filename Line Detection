@@ -1,0 +1,44 @@
+int wheelLS;
+int wheelRS;
+int wheelLPin = 10;
+int wheelRPin = 11;
+#define Speed 50   //define the speed to be 50
+void setup() 
+{
+pinMode(wheelLPin, OUTPUT);   
+pinMode(wheelRPin, OUTPUT);
+ 
+
+}
+
+void loop() 
+{  //Create three variables for each of the three line sensors
+  int lineSensor1 = analogRead(A0);   //left sensor
+  int lineSensor2 = analogRead(A1);   //center sensor
+  int lineSensor3 = analogRead(A2);   //right sensor
+
+  if (lineSensor2 > 800)  //if the middle sensor is reading a black line make both wheels go forward
+  {
+    wheelLS = -Speed;
+    wheelRS = Speed;
+  }
+  else if (lineSensor1 > 800)   //if the left sensor is reading a black line stop the left wheel and continue running the right wheel
+  {                             //causing the mobile platform to turn to the left
+    wheelLS = 0;
+    wheelRS = Speed;
+  }
+  else if (lineSensor3 > 800)   //if the right sensor is reading a black line stop the right wheel and continue spinning the left wheel
+  {                             //causing the mobile platform to turn to the right
+    wheelLS = -Speed;
+    wheelRS = 0;
+  }
+  else if (lineSensor2 < 800)   //if the middle sensor is no longer on the black line stop moving the mobile platform
+  {
+    wheelLS = 0;
+    wheelRS = 0;
+  }
+  
+  analogWrite(wheelLPin, wheelLS); //these associate the speeds from the if statements (wheelLS, wheelRS) and sends the speed to the 
+  analogWrite(wheelRPin, wheelRS); //pins associated with wheels (wheelLPin, wheelRPin)
+  delay(0);
+}
