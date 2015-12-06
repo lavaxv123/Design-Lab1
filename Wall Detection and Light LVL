@@ -1,0 +1,69 @@
+#define Speed 50
+int wheelRPin = 10;  //digital pin 1
+int wheelLPin = 11;  //digital pin 2
+int wheelRS = Speed;
+int wheelLS = -Speed;
+int iniLight;
+
+void setup() 
+{
+ pinMode(wheelRPin, OUTPUT);
+ pinMode(wheelLPin, OUTPUT);
+ iniLight = analogRead(A0); //find the initial light level (calibration)
+}
+
+bool wall_detection()   //funcrtion to find out if the mobile platform is in contact with the wall
+{
+  bool contact;       //true/false variable... in contact with wall, true - yes, false - no.
+  int bumper1 = analogRead(A1);    //micro switch on analog pin A1
+  int bumper2 = analogRead(A2);    //micro switch on analog pin A2
+  if ((bumper1 || bumper2) == 0)
+  {
+    contact = true;   //if either bumper is pressed in, set contact equal to true
+  }
+  else
+  {
+    contact = false;  //if neither bumper is pressed in, set contact equal to false
+  }
+
+  return contact;
+}
+
+void loop() 
+{
+  int lightLvl = analogRead(A0);    //Photoresistor uses analog pin A0
+  while(lightLvl > iniLight*2)      //while the light level is double the initial light level
+   {   
+      analogWrite(wheelLPin, 0);    //tell the wheels to stop
+      analogWrite(wheelRPin, 0);
+      delay(0);
+      lightLvl = analogRead(A0); 
+   }
+   
+    analogWrite(wheelLPin, wheelLS);    //tell the wheels to move at speed (wheelLS and wheelRS)
+    analogWrite(wheelRPin, wheelRS);
+    delay(0);                           //no delay
+
+  bool x = wall_detection();
+  if (x == true)
+  {
+    wheelLS = Speed;    //set the speed of the wheels for reverse.
+    wheelRS = -Speed;
+
+    analogWrite(wheelLPin, wheelLS);    //tell the wheels to move at speed (wheelLS and wheelRS)
+    analogWrite(wheelRPin, wheelRS);
+    delay(2000);                        //reverse for 2 seconds
+
+    wheelLS = -Speed;       //make the left wheel go forward and the right wheel not move
+    wheelRS = 0;            //causing the vehicle to turn right
+    analogWrite(wheelLPin, wheelLS); 
+    analogWrite(wheelRPin, wheelRS);
+    delay(2000);    //turn to the right for 2 seconds
+
+    wheelRS = Speed;
+    analogWrite(wheelLPin, wheelLS);   //start the vehicle moving forward again
+    analogWrite(wheelRPin, wheelRS);
+  }
+
+  
+}
