@@ -1,0 +1,81 @@
+#include <IRremote.h>
+#define Speed 50
+
+long forward;       //Buttons on the remote
+long right;       //***Need the HEX values for the buttons for the program to work***
+long back;
+long left;
+long Stop;
+
+int RECV_PIN = 11;
+int wheelLS = -Speed;
+int wheelRS = Speed;
+int wheelLPin = 10;
+int wheelRPin = 9;
+
+IRrecv irrecv(RECV_PIN);    //Creating an IR reciever called irrecv using pin RECV_PIN (11)
+decode_results results;     //the decoded results are stored in results
+
+
+void setup() 
+{
+  Serial.begin(9600);         
+  pinMode(wheelLPin, OUTPUT);   //set up the pins the wheels are using
+  pinMode(wheelRPin, OUTPUT);
+
+  irrecv.enableIRIn();          //enable the IR reciever irrecv
+  irrecv.blink13(true);         //make led 13 blink when the arduino is recieving a signal
+
+  analogWrite(wheelLPin, 0);    //set the mobile platform so that is starts with no motion
+  analogWrite(wheelRPin, 0);
+
+}
+
+void loop() 
+{
+  if (irrecv.decode(&results))    //if the reciever is recieving a signal do one of the following below
+  {
+    if (results.value == forward) //1. move forward 
+    {
+      wheelLS = -Speed;
+      wheelRS = Speed;
+
+      analogWrite(wheelLPin, wheelLS);
+      analogWrite(wheelRPin, wheelRS);
+    }
+    else if (results.value == back) //2. move backwards
+    {
+      wheelLS = Speed;
+      wheelRS = -Speed;
+
+      analogWrite(wheelLPin, wheelLS);
+      analogWrite(wheelRPin, wheelRS);
+    }
+    else if (results.value == right) //3. move right
+    {
+      wheelLS = -Speed;
+      wheelRS = 0;
+
+      analogWrite(wheelLPin, wheelLS);
+      analogWrite(wheelRPin, wheelRS);
+    }
+    else if (results.value == left) //4. move left
+    {
+      wheelLS = 0;
+      wheelRS = Speed;
+
+      analogWrite(wheelLPin, wheelLS);
+      analogWrite(wheelRPin, wheelRS);
+    }
+    else if (results.value == Stop) //5. stop moving all together
+    {
+      wheelLS = 0;
+      wheelRS = 0;
+
+      analogWrite(wheelLPin, wheelLS);
+      analogWrite(wheelRPin, wheelRS);
+    }
+    irrecv.resume();    //continue looking for an IR signal
+  }
+
+}
