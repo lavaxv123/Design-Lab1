@@ -1,0 +1,53 @@
+
+
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_PWMServoDriver.h"
+
+
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+
+
+
+Adafruit_DCMotor *LeftMotor = AFMS.getMotor(3);
+Adafruit_DCMotor *RightMotor = AFMS.getMotor(4);
+int threshold = 400;
+
+void setup() {
+
+
+  AFMS.begin();  
+  LeftMotor->setSpeed(100);
+  LeftMotor->run(RELEASE);
+
+  RightMotor->setSpeed(100);
+  RightMotor->run(RELEASE);
+}
+
+void loop() {
+ int sensorValue = analogRead(A0);
+  if (sensorValue < threshold) {
+    LeftMotor->run(FORWARD);
+    RightMotor->run(FORWARD);
+  } else {
+   LeftMotor->run(RELEASE);
+   RightMotor->run(RELEASE);
+   delay(100);
+
+   LeftMotor->run(BACKWARD);
+   RightMotor->run(BACKWARD);
+   delay(1000);
+
+   LeftMotor->run(RELEASE);
+   RightMotor->run(RELEASE);
+   delay(100);
+
+   LeftMotor->run(FORWARD);
+   RightMotor->run(BACKWARD);
+   delay(1000);
+
+   LeftMotor->run(RELEASE);
+   RightMotor->run(RELEASE);
+   delay(100);
+  }
+}
