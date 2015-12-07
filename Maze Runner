@@ -1,14 +1,24 @@
-int wheelLS;
-int wheelRS;
-int wheelLPin = 10;
-int wheelRPin = 11;
-#define Speed 60   //define the speed to be 50
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_PWMServoDriver.h"
+
+
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+
+
+
+Adafruit_DCMotor *LeftMotor = AFMS.getMotor(3);
+Adafruit_DCMotor *RightMotor = AFMS.getMotor(4);
 #define THRESHHOLD 800  //above this threshhold the color reading is black, below the color is considered white
 
 void setup()
 {
-  pinMode(wheelLPin, OUTPUT);   
-  pinMode(wheelRPin, OUTPUT);
+  AFMS.begin();  
+  LeftMotor->setSpeed(100);
+  LeftMotor->run(FORWARD);
+
+  RightMotor->setSpeed(100);
+  RightMotor->run(FORWARD);
 
 }
 
@@ -20,37 +30,35 @@ void loop()
   
   if (lineSensor1 > THRESHHOLD)  //if there is a possible path left then go left
   {
-    wheelLS = 0;
-    wheelRS = Speed;
-    analogWrite(wheelLPin, wheelLS);
-    analogWrite(wheelRPin, wheelRS); 
-    delay(0); 
+    LeftMotor->run(RELEASE);
+    RightMotor->run(RELEASE);
+    delay(100);
+    RightMotor->run(FORWARD);
   }
   else if (lineSensor1 < THRESHHOLD)//in the case that there isn't a left path...
   {
     if (lineSensor2 > THRESHHOLD)//...check if there is a forward path, if so then go forward
     {
-      wheelLS = -Speed;
-      wheelRS = Speed;
-      analogWrite(wheelLPin, wheelLS);
-      analogWrite(wheelRPin, wheelRS);
-      delay(0);
+      LeftMotor->run(RELEASE);
+      RightMotor->run(RELEASE);
+      delay(100);
+      LeftMotor->run(BACKWARD);
+      RightMotor->run(BACKWARD);
     }
     else if (lineSensor2 < THRESHHOLD)//if ther is no forward path then...
     {
       while (lineSensor3 < THRESHHOLD)//... go in reverse until you find a path to the right and take it.
       {
-        wheelLS = Speed;
-        wheelRS = -Speed;
-        analogWrite(wheelLPin, wheelLS);
-        analogWrite(wheelRPin, wheelRS);
-        delay(0);
+        LeftMotor->run(RELEASE);
+        RightMotor->run(RELEASE);
+        delay(100);
+        LeftMotor->run(BACKWARD);
+        RightMotor->run(BACKWARD);
       }
-      wheelLS = -Speed;
-      wheelRS = 0;
-      analogWrite(wheelLPin, wheelLS);
-      analogWrite(wheelRPin, wheelRS);
-      delay(0);
+      LeftMotor->run(RELEASE);
+      RightMotor->run(RELEASE);
+      delay(100);
+      LeftMotor->run(FORWARD);
     }
     
   }
