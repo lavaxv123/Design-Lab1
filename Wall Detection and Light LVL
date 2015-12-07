@@ -1,23 +1,62 @@
-#define Speed 50
-int wheelRPin = 10;  //digital pin 1
-int wheelLPin = 11;  //digital pin 2
-int wheelRS = Speed;
-int wheelLS = -Speed;
-int iniLight;
 
+
+#include <Wire.h>
+#include <Adafruit_MotorShield.h>
+#include "utility/Adafruit_PWMServoDriver.h"
+
+
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+
+
+
+Adafruit_DCMotor *LeftMotor = AFMS.getMotor(3);
+Adafruit_DCMotor *RightMotor = AFMS.getMotor(4);
+
+int iniLight;
+int bumper1 = 8;
+int bumper2 = 10;
 void setup() 
 {
- pinMode(wheelRPin, OUTPUT);
- pinMode(wheelLPin, OUTPUT);
- iniLight = analogRead(A0); //find the initial light level (calibration)
+  AFMS.begin();  
+  LeftMotor->setSpeed(100);
+  LeftMotor->run(RELEASE);
+
+  RightMotor->setSpeed(100);
+  RightMotor->run(RELEASE);
+
+ pinMode(bumper1, INPUT);
+ delay(0);
+ pinMode(bumper2, INPUT);
+ delay(0);
+
+ Serial.begin(9600);
+ 
+ iniLight = analogRead(A4); //find the initial light level (calibration)
+ Serial.print("Initial light level: ");
+ delay(0);
+ Serial.println(iniLight);
+ delay(0);
 }
 
 bool wall_detection()   //funcrtion to find out if the mobile platform is in contact with the wall
 {
   bool contact;       //true/false variable... in contact with wall, true - yes, false - no.
-  int bumper1 = analogRead(A1);    //micro switch on analog pin A1
-  int bumper2 = analogRead(A2);    //micro switch on analog pin A2
-  if ((bumper1 || bumper2) == 0)
+  int bumper1c = digitalRead(8);  //read the pin 8 to see if the bumper is depressed or not
+  int bumper2c = digitalRead(10); //read the pin 10 to see if the bumper is depressed or not
+  Serial.println();
+  delay(0);
+  Serial.print("Bumper 1 state: ");
+  delay(0);
+  Serial.println(bumper1c);
+  delay(0);
+  Serial.print("Bumper 2 state: ");
+  delay(0);
+  Serial.println(bumper2c);
+  delay(0);
+  Serial.println();
+  delay(0);
+  
+  if ((bumper1c || bumper2c) == 0)
   {
     contact = true;   //if either bumper is pressed in, set contact equal to true
   }
@@ -31,38 +70,37 @@ bool wall_detection()   //funcrtion to find out if the mobile platform is in con
 
 void loop() 
 {
-  int lightLvl = analogRead(A0);    //Photoresistor uses analog pin A0
+  int lightLvl = analogRead(A4);    //Photoresistor uses analog pin A4
+  Serial.print("Light lvl: ");
+  Serial.println(lightLvl);
+  
   while(lightLvl > iniLight*2)      //while the light level is double the initial light level
    {   
-      analogWrite(wheelLPin, 0);    //tell the wheels to stop
-      analogWrite(wheelRPin, 0);
-      delay(0);
-      lightLvl = analogRead(A0); 
+      LeftMotor->run(RELEASE);
+      RightMotor->run(RELEASE);
+      lightLvl = analogRead(A4); 
    }
    
-    analogWrite(wheelLPin, wheelLS);    //tell the wheels to move at speed (wheelLS and wheelRS)
-    analogWrite(wheelRPin, wheelRS);
-    delay(0);                           //no delay
+    LeftMotor->run(FORWARD);
+    RightMotor->run(FORWARD);     
 
   bool x = wall_detection();
   if (x == true)
   {
-    wheelLS = Speed;    //set the speed of the wheels for reverse.
-    wheelRS = -Speed;
+    LeftMotor->run(RELEASE);
+    RightMotor->run(RELEASE);
+    delay(100);
+    LeftMotor->run(BACKWARD);
+    RightMotor->run(BACKWARD);//set the speed of the wheels for reverse.
+    delay(2000);
 
-    analogWrite(wheelLPin, wheelLS);    //tell the wheels to move at speed (wheelLS and wheelRS)
-    analogWrite(wheelRPin, wheelRS);
-    delay(2000);                        //reverse for 2 seconds
-
-    wheelLS = -Speed;       //make the left wheel go forward and the right wheel not move
-    wheelRS = 0;            //causing the vehicle to turn right
-    analogWrite(wheelLPin, wheelLS); 
-    analogWrite(wheelRPin, wheelRS);
-    delay(2000);    //turn to the right for 2 seconds
-
-    wheelRS = Speed;
-    analogWrite(wheelLPin, wheelLS);   //start the vehicle moving forward again
-    analogWrite(wheelRPin, wheelRS);
+    LeftMotor->run(RELEASE);
+    RightMotor->run(RELEASE);
+    delay(100);
+    LeftMotor->run(FORWARD);
+    delay(1000);                      
+    RightMotor->run(FORWARD);
+    
   }
 
   
