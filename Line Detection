@@ -1,20 +1,21 @@
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_PWMServoDriver.h"
-
+#define threshold 400
+#define Speed 100
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 
-Adafruit_DCMotor *LeftMotor = AFMS.getMotor(3);
-Adafruit_DCMotor *RightMotor = AFMS.getMotor(4);
+Adafruit_DCMotor *LeftMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *RightMotor = AFMS.getMotor(2);
 void setup() 
 {
 Serial.begin(9600);
 
 AFMS.begin();  
-  LeftMotor->setSpeed(100);
+  LeftMotor->setSpeed(Speed);
   LeftMotor->run(RELEASE);
 
-  RightMotor->setSpeed(100);
+  RightMotor->setSpeed(Speed);
   RightMotor->run(RELEASE);
 }
 
@@ -23,45 +24,45 @@ void loop()
   int lineSensor1 = analogRead(A0);   //left sensor
   int lineSensor2 = analogRead(A1);   //center sensor
   int lineSensor3 = analogRead(A2);   //right sensor
-  Serial.println(lineSensor1);
+  Serial.print(lineSensor1);
+  Serial.print(", ");
+  Serial.print(lineSensor2);
+  Serial.print(", ");
+  Serial.print(lineSensor3);
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
   delay(0);
-  Serial.println(lineSensor2);
-  delay(0);
-  Serial.println(lineSensor3);
-  delay(0);
+
 
   
 
 
 
-  if (lineSensor2 > 400)  //if the middle sensor is reading a black line make both wheels go forward
+  if (lineSensor2 > threshold )  //if the middle sensor is reading a black line make both wheels go forward
   {
-    LeftMotor->run(RELEASE);
-    RightMotor->run(RELEASE);
     LeftMotor->run(FORWARD);
     RightMotor->run(FORWARD);
   }
-  else if (lineSensor1 > 400)   //if the left sensor is reading a black line stop the left wheel and continue running the right wheel
-  {                             //causing the mobile platform to turn to the left
-    LeftMotor->run(RELEASE);
-    RightMotor->run(RELEASE);
-    RightMotor->run(FORWARD);
-  }
-  else if (lineSensor3 > 400)   //if the right sensor is reading a black line stop the right wheel and continue spinning the left wheel
-  {                             //causing the mobile platform to turn to the right
-    LeftMotor->run(RELEASE);
-    RightMotor->run(RELEASE);
-    LeftMotor->run(FORWARD);
-  }
-  else if (lineSensor2 < 400)   //if the middle sensor is no longer on the black line stop moving the mobile platform
+  else if (lineSensor1 > threshold)    //if the left line sensor is reading a black line turn left
   {
     LeftMotor->run(RELEASE);
-    RightMotor->run(RELEASE);
-    LeftMotor->run(BACKWARD);
-    RightMotor->run(BACKWARD);
+    RightMotor->run(FORWARD);
   }
-  
-  
- 
-  delay(0);
-}
+  else if (lineSensor3 > threshold)    //if the right line sensor is reading a black line turn right
+  {
+    LeftMotor->run(FORWARD);
+    RightMotor->run(RELEASE);
+  }
+//  else if (lineSensor1 < threshold && lineSensor2 < threshold && lineSensor3 < threshold)
+//  {
+//    LeftMotor->run(RELEASE);
+//    RightMotor->run(RELEASE);
+//    delay(100);
+//    LeftMotor->run(BACKWARD);
+//    RightMotor->run(BACKWARD);
+//  }
