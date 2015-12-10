@@ -9,24 +9,24 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 
 
 
-Adafruit_DCMotor *LeftMotor = AFMS.getMotor(3);
-Adafruit_DCMotor *RightMotor = AFMS.getMotor(4);
+Adafruit_DCMotor *LeftMotor = AFMS.getMotor(1);
+Adafruit_DCMotor *RightMotor = AFMS.getMotor(2);
 
 int iniLight;
-int bumper1 = 8;
+int bumper1 = 6;
 int bumper2 = 10;
 void setup() 
 {
   AFMS.begin();  
-  LeftMotor->setSpeed(100);
+  LeftMotor->setSpeed(75);
   LeftMotor->run(RELEASE);
 
-  RightMotor->setSpeed(100);
+  RightMotor->setSpeed(75);
   RightMotor->run(RELEASE);
 
- pinMode(bumper1, INPUT);
+ pinMode(bumper1, INPUT_PULLUP);
  delay(0);
- pinMode(bumper2, INPUT);
+ pinMode(bumper2, INPUT_PULLUP);
  delay(0);
 
  Serial.begin(9600);
@@ -41,22 +41,22 @@ void setup()
 bool wall_detection()   //funcrtion to find out if the mobile platform is in contact with the wall
 {
   bool contact;       //true/false variable... in contact with wall, true - yes, false - no.
-  int bumper1c = digitalRead(8);  //read the pin 8 to see if the bumper is depressed or not
+  int bumper1c = digitalRead(6);  //read the pin 6 to see if the bumper is depressed or not
   int bumper2c = digitalRead(10); //read the pin 10 to see if the bumper is depressed or not
+  Serial.print(bumper1c);
+  Serial.print(", ");
+  Serial.print(bumper2c);
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
+  Serial.println();
   Serial.println();
   delay(0);
-  Serial.print("Bumper 1 state: ");
-  delay(0);
-  Serial.println(bumper1c);
-  delay(0);
-  Serial.print("Bumper 2 state: ");
-  delay(0);
-  Serial.println(bumper2c);
-  delay(0);
-  Serial.println();
-  delay(0);
-  
-  if ((bumper1c || bumper2c) == 0)
+
+
+  if (bumper1c == 0 || bumper2c == 0)
   {
     contact = true;   //if either bumper is pressed in, set contact equal to true
   }
@@ -70,16 +70,16 @@ bool wall_detection()   //funcrtion to find out if the mobile platform is in con
 
 void loop() 
 {
-  int lightLvl = analogRead(A4);    //Photoresistor uses analog pin A4
-  Serial.print("Light lvl: ");
-  Serial.println(lightLvl);
-  
-  while(lightLvl > iniLight*2)      //while the light level is double the initial light level
-   {   
-      LeftMotor->run(RELEASE);
-      RightMotor->run(RELEASE);
-      lightLvl = analogRead(A4); 
-   }
+//  int lightLvl = analogRead(A4);    //Photoresistor uses analog pin A4
+//  Serial.print("Light lvl: ");
+//  Serial.println(lightLvl);
+//  
+//  while(lightLvl > iniLight*2)      //while the light level is double the initial light level
+//   {   
+//      LeftMotor->run(RELEASE);
+//      RightMotor->run(RELEASE);
+//      lightLvl = analogRead(A4); 
+//   }
    
     LeftMotor->run(FORWARD);
     RightMotor->run(FORWARD);     
